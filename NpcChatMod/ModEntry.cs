@@ -43,13 +43,12 @@ namespace NpcChatMod {
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper) {
+
             this.Config = this.Helper.ReadConfig<ModConfig>();
             this.Client = new HttpClient();
             Client.BaseAddress = new Uri(this.Config.OpenAiUrl);
             Client.MaxResponseContentBufferSize = this.Config.OpenAiMaxBufferSize;
             Client.Timeout = TimeSpan.FromMilliseconds(this.Config.OpenAiTimeoutMillis);
-
-            // Add an Accept header for JSON format.
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this.Config.OpenAiBearerToken);
 
@@ -62,9 +61,10 @@ namespace NpcChatMod {
         ******************/
 
         private void OnMenuChanged(object sender, MenuChangedEventArgs e) {
+
             if (e.NewMenu is DialogueBox dialogue) {
 
-                var newStack = new Stack<string>(dialogue.characterDialoguesBrokenUp.Count);
+                var newStack = new Stack<string>(dialogue.characterDialoguesBrokenUp.Count + 10);
 
                 foreach (var dialogueStackItem in dialogue.characterDialoguesBrokenUp) {
                     var editedItem = this.getAIEdit(dialogue.characterDialogue.speaker.name, dialogueStackItem);
@@ -83,10 +83,9 @@ namespace NpcChatMod {
         }
 
         private string getAIEdit(string characterName, string input) {
+
             var model = this.Config.OpenAiModel;
             var instruction = this.Config.OpenAiInstruction.Replace("{characterName}", characterName);
-//                $"Act as {characterName} from Stardew Valley and embellish the dialog with details. Limit the size of the response to a few sentences.";
-
             var payload = new AiEditRequest(model, input, instruction, this.Config.OpenAiTemperature);
             var payloadString = JsonConvert.SerializeObject(payload);
             var payloadContent = new StringContent(payloadString, System.Text.Encoding.UTF8, "application/json");
