@@ -11,5 +11,6 @@ namespace NpcChatMod {
         public int OpenAiTimeoutMillis { get; set; } = 5000;
         public string OpenAiEdits { get; set; } = "/v1/edits";
         public long OpenAiMaxBufferSize { get; set; } = 1024;
+        public int DialogueCharacterCount { get; set; } = 185;
     }
 }
