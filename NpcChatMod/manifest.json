@@ -1,7 +1,7 @@
 ﻿{
   "Name": "NpcChatMod",
   "Author": "Mike Landis",
-  "Version": "0.0.1",
+  "Version": "0.0.2",
   "Description": "Experiment with AI Dialog",
   "UniqueID": "mkelandis.NpcChatMod",
   "EntryDll": "NpcChatMod.dll",
