@@ -26,5 +26,6 @@ https://platform.openai.com/docs/api-reference/edits/create
   "OpenAiTimeoutMillis": 5000,
   "OpenAiEdits": "/v1/edits",
   "OpenAiMaxBufferSize": 1024
+  "DialogueCharacterCount": 185
 }
 ```
