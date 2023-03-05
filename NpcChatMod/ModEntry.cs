@@ -36,6 +36,7 @@ namespace NpcChatMod {
 
         private HttpClient Client;
         private ModConfig Config;
+        private TextBreaker TextBreaker;
 
         /*********
         ** Public methods
@@ -45,12 +46,15 @@ namespace NpcChatMod {
         public override void Entry(IModHelper helper) {
 
             this.Config = this.Helper.ReadConfig<ModConfig>();
+
             this.Client = new HttpClient();
             Client.BaseAddress = new Uri(this.Config.OpenAiUrl);
             Client.MaxResponseContentBufferSize = this.Config.OpenAiMaxBufferSize;
             Client.Timeout = TimeSpan.FromMilliseconds(this.Config.OpenAiTimeoutMillis);
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this.Config.OpenAiBearerToken);
+
+            this.TextBreaker = new TextBreaker(this.Config.DialogueCharacterCount);
 
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
         }
@@ -67,10 +71,10 @@ namespace NpcChatMod {
                 var newStack = new Stack<string>(dialogue.characterDialoguesBrokenUp.Count + 10);
 
                 foreach (var dialogueStackItem in dialogue.characterDialoguesBrokenUp) {
-                    var editedItem = this.getAIEdit(dialogue.characterDialogue.speaker.name, dialogueStackItem);
+                    var editedItem = this.GetAIEdit(dialogue.characterDialogue.speaker.name, dialogueStackItem);
                     this.Monitor.Log($"Edited Item: {dialogueStackItem} --> {editedItem}", LogLevel.Debug);
 
-                    var chunks = this.breakText(editedItem);
+                    var chunks = this.TextBreaker.BreakAtPunctuation(editedItem);
                     for (int i = chunks.Length - 1; i >= 0; i--) {
                         var chunk = chunks[i];
                         newStack.Push(chunk);
@@ -82,7 +86,7 @@ namespace NpcChatMod {
             }
         }
 
-        private string getAIEdit(string characterName, string input) {
+        private string GetAIEdit(string characterName, string input) {
 
             var model = this.Config.OpenAiModel;
             var instruction = this.Config.OpenAiInstruction.Replace("{characterName}", characterName);
@@ -91,6 +95,7 @@ namespace NpcChatMod {
             var payloadContent = new StringContent(payloadString, System.Text.Encoding.UTF8, "application/json");
 
             try {
+                this.Monitor.Log($"API Call: {payloadString})", LogLevel.Debug);
                 HttpResponseMessage response = this.Client.PostAsync(this.Config.OpenAiEdits, payloadContent).GetAwaiter().GetResult();  // Blocking call! Program will wait here until a response is received or a timeout occurs.
 
                 if (response.IsSuccessStatusCode) {
@@ -102,14 +107,14 @@ namespace NpcChatMod {
                         return aiEdit;
                     }
                 }
-                this.Monitor.Log($"API Error: {response.StatusCode} ({response.ReasonPhrase} {payloadContent})", LogLevel.Error);
+                this.Monitor.Log($"API Error: {response.StatusCode} ({response.ReasonPhrase} {payloadString})", LogLevel.Error);
             } catch (Exception e) {
                 this.Monitor.Log($"API Exception: {e.Message} ({e})", LogLevel.Error);
             }
             return input;
         }
 
-        string[] breakText(string input) {
+        string[] BreakText(string input) {
             return input.Split(new[] { "\n\n" }, 25, StringSplitOptions.RemoveEmptyEntries);
         }
     }

@@ -1,61 +1,47 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using System;
 
 namespace NpcChatMod {
     public class TextBreaker {        
 
-        const string SPLIT_REGEX = @"(?<=[.?!])";
-
-        int characterCount = 512;
+        readonly string SPLIT_REGEX = @"(?<=[.?!])";
+        readonly int characterCount = 512;
 
         public TextBreaker(int characterCount) {
             this.characterCount = characterCount;
         }
 
-        public string[] breakAtPunctuation(string text) {
+        public string[] BreakAtPunctuation(string text) {
 
-            // skip if we dont need to break it up!
-            if (text.Length < characterCount) {
-                return new string[] { text };
-            }
-
-            int paragraphCount = (text.Length / characterCount) + 1;
-            int paragraphIdx = 0;
-            string[] paragraphs = new string[paragraphCount];
+            List<string> paragraphs = new List<string>();
 
             // split at punctuation            
             string[] sentences = Regex.Split(text, SPLIT_REGEX);
+            string currentParagraph = sentences[0].Trim();
 
-            paragraphs[paragraphIdx] = sentences[0];
             for (int i = 1; i < sentences.Length; i++) {
 
-                // do we need this?...
-                sentences[i] = sentences[i].Trim();
-                if (sentences[i].Length <= 0) {
+                var currentSentence = sentences[i];
+                var currentSentenceTrimmed = String.Copy(sentences[i]).Trim();
+                if (currentSentenceTrimmed.Length <= 0) {
                     continue;
                 }
 
-                var sentenceLength = sentences[i].Length;
-                var paragraphLength = paragraphs[paragraphIdx].Length;
-
-                Console.WriteLine($"Paragraph Idx: {paragraphIdx}, sentence length: {sentenceLength}, paragraphLength: {paragraphLength}");
+                var sentenceLength = currentSentenceTrimmed.Length;
+                var paragraphLength = currentParagraph.Length;
 
                 // advance to the next paragraph if we've run out of characters
-                if ((sentenceLength + paragraphLength) > characterCount) {
-                    paragraphIdx++;
-                    paragraphs[paragraphIdx] = sentences[i];
+                if ((sentenceLength + paragraphLength) > characterCount || currentSentence.StartsWith("\r\n")) {
+                    paragraphs.Add(currentParagraph);
+                    currentParagraph = currentSentenceTrimmed;
                 } else {
-                    paragraphs[paragraphIdx] = $"{paragraphs[paragraphIdx]} {sentences[i]}";
+                    currentParagraph = $"{currentParagraph} {currentSentenceTrimmed}";
                 } 
-
-                Console.WriteLine($"Paragraph: --{paragraphs[paragraphIdx]}--");
             }
 
-            paragraphs.
-            return paragraphs;
+            paragraphs.Add(currentParagraph);
+            return paragraphs.ToArray();
         }
-
-    }
-    
+    }    
 }
