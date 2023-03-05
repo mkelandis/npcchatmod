@@ -95,7 +95,6 @@ namespace NpcChatMod {
             var payloadContent = new StringContent(payloadString, System.Text.Encoding.UTF8, "application/json");
 
             try {
-                this.Monitor.Log($"API Call: {payloadString})", LogLevel.Debug);
                 HttpResponseMessage response = this.Client.PostAsync(this.Config.OpenAiEdits, payloadContent).GetAwaiter().GetResult();  // Blocking call! Program will wait here until a response is received or a timeout occurs.
 
                 if (response.IsSuccessStatusCode) {
