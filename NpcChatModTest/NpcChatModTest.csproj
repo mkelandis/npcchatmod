@@ -49,6 +49,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CamelCaseBreakerTest.cs" />
+    <Compile Include="GameInfoTest.cs" />
     <Compile Include="TextBreakerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

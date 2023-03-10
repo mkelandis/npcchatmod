@@ -6,7 +6,7 @@ namespace NpcChatMod {
         public string OpenAiUrl { get; set; } = "https://api.openai.com";
         public string OpenAiBearerToken { get; set; } = "{yourtoken}";
         public string OpenAiModel { get; set; } = "text-davinci-edit-001";
-        public string OpenAiInstruction { get; set; } = "Act as {characterName} from Stardew Valley and embellish the dialog with details. Limit the size of the response to a few sentences.";
+        public string OpenAiInstruction { get; set; } = "Speak as {characterName} (from Stardew Valley). Embellish the dialog with details. Limit the size of the response to 3-7 sentences. Location: {insideOrOutside} in {location}. When: {timeOfDay} in {season}. People nearby include: {characters}.";
         public double OpenAiTemperature { get; set; } = 0.5;
         public int OpenAiTimeoutMillis { get; set; } = 5000;
         public string OpenAiEdits { get; set; } = "/v1/edits";
