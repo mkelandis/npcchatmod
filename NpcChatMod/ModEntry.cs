@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,7 @@ namespace NpcChatMod {
         private HttpClient Client;
         private ModConfig Config;
         private TextBreaker TextBreaker;
+        private GameInfo GameInfo;
 
         /*********
         ** Public methods
@@ -55,6 +57,7 @@ namespace NpcChatMod {
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this.Config.OpenAiBearerToken);
 
             this.TextBreaker = new TextBreaker(this.Config.DialogueCharacterCount);
+            this.GameInfo = new GameInfo();
 
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
         }
@@ -89,7 +92,8 @@ namespace NpcChatMod {
         private string GetAIEdit(string characterName, string input) {
 
             var model = this.Config.OpenAiModel;
-            var instruction = this.Config.OpenAiInstruction.Replace("{characterName}", characterName);
+            var instruction = this.getInstruction(characterName);
+            this.Monitor.Log($"Instruction: {instruction}", LogLevel.Debug);
             var payload = new AiEditRequest(model, input, instruction, this.Config.OpenAiTemperature);
             var payloadString = JsonConvert.SerializeObject(payload);
             var payloadContent = new StringContent(payloadString, System.Text.Encoding.UTF8, "application/json");
@@ -113,8 +117,17 @@ namespace NpcChatMod {
             return input;
         }
 
-        string[] BreakText(string input) {
-            return input.Split(new[] { "\n\n" }, 25, StringSplitOptions.RemoveEmptyEntries);
+        private string getInstruction(string characterName) {
+            var instruction = this.Config.OpenAiInstruction
+                .Replace("{characterName}", characterName)
+                .Replace("{dayOfMonth}", this.GameInfo.dayOfMonth)
+                .Replace("{insideOrOutside}", this.GameInfo.insideOrOutside)
+                .Replace("{location}", this.GameInfo.location)
+                .Replace("{season}", this.GameInfo.season)
+                .Replace("{timeOfDay}", this.GameInfo.timeOfDay)
+                .Replace("{characters}", this.GameInfo.getCharacters(characterName));
+
+            return instruction;
         }
     }
 }
