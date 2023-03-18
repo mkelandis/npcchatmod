@@ -15,13 +15,13 @@ Rewrite NPC Dialogue in realtime based on interactions with OpenAI ChatGPT
 * Uses the POST /v1/edits endpoint:
 https://platform.openai.com/docs/api-reference/edits/create
 
-## Config
+## Config Example
 ```json
 {
   "OpenAiUrl": "https://api.openai.com",
   "OpenAiBearerToken": "{bearer token from OpenAI}",
   "OpenAiModel": "text-davinci-edit-001",
-  "OpenAiInstruction": "Act as {characterName} from Stardew Valley talking to a farmer. We are {insideOrOutside} in {location}. When: {timeOfDay} in {season}. People other than us nearby are: {characters}. Limit the text to 3-7 sentences.",
+  "OpenAiInstruction": "Act as {characterName} from Stardew Valley. The location is: {insideOrOutside} in {location}. The time of day is: {timeOfDay} in {season}. People other than us nearby: {characters}. Embellish the dialog. Limit the text to 3-7 sentences.",
   "OpenAiTemperature": 0.5,
   "OpenAiTimeoutMillis": 5000,
   "OpenAiEdits": "/v1/edits",
